@@ -62,9 +62,4 @@ jobs:
       - name: Run tests
         run: ./gradlew clean test --info
 
-      - name: Archive test report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report
-          path: build/reports/tests/test/index.html
+     
