@@ -8,16 +8,17 @@ on:
 
 jobs:
   build-and-test:
-    timeout-minutes: 15
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       selenium:
         image: selenium/standalone-chrome:latest
+        
         ports:
           - 4444:4444
         options: >-
-          --health-cmd="curl -f http://localhost:4444/status || exit 1"
+          --health-cmd="curl -s http://localhost:4444/status | grep -q 'ready' || exit 1"
           --health-interval=5s
           --health-timeout=2s
           --health-retries=10
@@ -31,17 +32,23 @@ jobs:
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Wait for Selenium Hub
+      - name: Wait for Selenium to be ready
+        
         run: |
-          echo "Waiting for Selenium Hub..."
-          until curl -s http://localhost:4444/status | grep '"ready":true'; do
-            sleep 1
+          echo "⏳ Waiting for Selenium Hub on localhost:4444/status ..."
+          for i in {1..20}; do
+            if curl -s http://localhost:4444/status | grep -q '"ready":true'; then
+              echo "✅ Selenium Hub is ready"
+              exit 0
+            fi
+            echo "  still not ready, retrying..."
+            sleep 3
           done
-          echo "Selenium Hub is ready."
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+          echo "❌ Selenium Hub failed to start in time"
+          exit 1
 
       - name: Set up Java 17
         uses: actions/setup-java@v3
@@ -49,5 +56,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build & test with Gradle
-        run: ./gradlew clean test --info --no-daemon
+      - name: Make Gradlew executable
+        run: chmod +x gradlew
+
+      - name: Run tests
+        run: ./gradlew clean test --info
+
+      - name: Archive test report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: build/reports/tests/test/index.html
