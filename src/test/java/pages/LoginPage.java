@@ -17,7 +17,7 @@ public class LoginPage {
         this.driver = driver;
         this.wait   = new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.get("https://www.phptravels.net/admin");
-        // 等待输入框可见
+     
         wait.until(ExpectedConditions.visibilityOfElementLocated(emailBy));
     }
 
