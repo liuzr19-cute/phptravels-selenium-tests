@@ -13,7 +13,7 @@ jobs:
 
     services:
       selenium:
-        image: selenium/standalone-chrome:4.12.0-20231128  # 版本请跟镜像仓库保持一致
+        image: selenium/standalone-chrome:latest   # 改成 latest，避免找不到具体版本标签
         ports:
           - 4444:4444
         options: >-
