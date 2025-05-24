@@ -11,18 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    services:
-      selenium:
-        
-        image: selenium/standalone-chrome:4.9.0-20230509
-        ports:
-          - 4444:4444
-        options: >-
-          --health-cmd="curl -s http://localhost:4444/status | grep '"'"\"ready\":true"'"' || exit 1"
-          --health-interval=5s
-          --health-timeout=2s
-          --health-retries=12
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,23 +21,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Wait for Selenium Hub
-       
-        run: |
-          echo "Waiting for Selenium Hub..."
-          for i in $(seq 1 12); do
-            if curl -sf http://localhost:4444/status | grep '"ready":true'; then
-              echo "Selenium is ready!"
-              exit 0
-            fi
-            echo "still not ready, retrying..."
-            sleep 5
-          done
-          echo "::error::Selenium Hub failed to start in time"
-          exit 1
-
-      - name: Make Gradlew executable
-        run: chmod +x gradlew
-
       - name: Run tests
-        run: ./gradlew clean test
+        run: |
+          chmod +x gradlew
+          ./gradlew clean test --info
