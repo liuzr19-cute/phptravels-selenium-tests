@@ -1,5 +1,6 @@
 name: CI
 
+
 on:
   push:
     branches: [ main ]
@@ -21,7 +22,18 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make Gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Run tests
-        run: |
-          chmod +x gradlew
-          ./gradlew clean test --info
+        run: ./gradlew clean test --info
