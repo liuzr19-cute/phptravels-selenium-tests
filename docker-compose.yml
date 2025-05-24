@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  selenium:
+    image: selenium/standalone-chrome:124.0
+    shm_size: 2gb
+  tests:
+    build: .
+    depends_on:
+      - selenium
+   environment:
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub

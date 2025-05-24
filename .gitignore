@@ -1,0 +1,8 @@
+# IDE
+.idea/
+.vscode/
+# Build
+build/
+# OS
+.DS_Store
+Thumbs.db
